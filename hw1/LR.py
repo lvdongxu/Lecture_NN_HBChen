@@ -11,7 +11,7 @@ import argparse
 
 parser = argparse.ArgumentParser(description="Import the parameters of the LR")
 parser.add_argument('--pre_or_not', '-p', choices=[0,1], default=0, type=int, help='Preprocessing or not')
-parser.add_argument('--ascent_way', '-a', choices=[0,1], default=0, type=int, help='Choosing the Gradient Ascent way')
+parser.add_argument('--ascent_way', '-a', choices=[0,1,2], default=0, type=int, help='Choosing the Gradient Ascent way')
 args=parser.parse_args()
 
 filename='./data.txt' #文件目录
@@ -138,25 +138,33 @@ def stocGradAscent0(dataMat, labelMat, alpha, maxCycles):
         errRate_record[k] = errRate
     return weights, weight_record, loss_record, errRate_record
 
-# def stocGradAscent1(dataMat, labelMat): #改进版随机梯度上升，在每次迭代中随机选择样本来更新权重，并且随迭代次数增加，权重变化越小。
-#     dataMatrix=mat(dataMat)
-#     classLabels=labelMat
-#     m,n=shape(dataMatrix)
-#     weights=ones((n,1))
-#     maxCycles=1000000
-#     weight_record = ones((maxCycles,n,1)) #权重记录，用于展示每次训练得到的权重变化 
-#     for j in range(maxCycles): #迭代
-#         print("Stochastic Gradient Ascent v1 -- 第",j,"次迭代")
-#         dataIndex=[i for i in range(m)]
-#         for i in range(m): #随机遍历每一行
-#             alpha=4/(1+j+i)+0.0001  #随迭代次数增加，权重变化越小。
-#             randIndex=int(random.uniform(0,len(dataIndex)))  #随机抽样
-#             h=sigmoid(sum(dataMatrix[randIndex]*weights))
-#             error=classLabels[randIndex]-h
-#             weights=weights+alpha*error*dataMatrix[randIndex].transpose()
-#             del(dataIndex[randIndex]) #去除已经抽取的样本
-#         weight_record[j] = weights
-#     return weights
+def stocGradAscent1(dataMat, labelMat): #改进版随机梯度上升，在每次迭代中随机选择样本来更新权重，并且随迭代次数增加，权重变化越小。
+    dataMatrix     = mat(dataMat)
+    classLabels    = labelMat
+    m, n           = shape(dataMatrix)
+    weights        = ones((n,1))
+    maxCycles      = 1000000
+    weight_record  = ones((maxCycles,n,1)) #权重记录，用于展示每次训练得到的权重变化 
+    loss_record    = zeros((maxCycles,1)) #loss记录画图 
+    errRate_record = zeros((maxCycles,1)) #Error Rate记录画图 
+
+    for j in range(maxCycles): #迭代
+        print("Stochastic Gradient Ascent v1 -- 第",j,"次迭代")
+        dataIndex=[i for i in range(m)]
+        for i in range(m): #随机遍历每一行
+            alpha     = 4/(1+j+i)+0.0001  #随迭代次数增加，权重变化越小。
+            randIndex = int(random.uniform(0,len(dataIndex)))  #随机抽样
+            h         = sigmoid(sum(dataMatrix[randIndex]*weights))
+            error     = classLabels[randIndex]-h
+            weights   = weights+alpha*error*dataMatrix[randIndex].transpose()
+            del(dataIndex[randIndex]) #去除已经抽取的样本
+        preLabel, preProb = predict(weights, dataMatrix)
+        loss              = cost_function(preProb, classLabels)
+        errRate           = predict_error_rate(preLabel, classLabels)
+        weight_record[j]  = weights
+        loss_record[j]    = loss
+        errRate_record[j] = errRate
+    return weights, weight_record, loss_record, errRate_record
     
 # def main():
 #     dataMat, labelMat = loadDataSet()
@@ -170,12 +178,17 @@ if __name__=='__main__':
     alpha             = 0.001
     maxCycles         = 100000 if pre_or_not == 1 else 1000000    
     npy_name_1        = "pre"  if pre_or_not == 1 else "no_pre"
-    npy_name_2        = "Grad" if ascent_way == 1 else "stocGrad"
+    # npy_name_2        = "Grad" if ascent_way == 1 else "stocGrad"
     if ascent_way == 0:
         weights, weight_record, loss_record, errRate_record = gradAscent(dataMat, labelMat, alpha, maxCycles)
-    else:
+        npy_name_2 = 'Grad'
+    elif ascent_way == 1:
         weights, weight_record, loss_record, errRate_record = stocGradAscent0(dataMat, labelMat, alpha, maxCycles)
-    
+        npy_name_2 = 'stocGrad0'
+    else:
+        weights, weight_record, loss_record, errRate_record = stocGradAscent1(dataMat, labelMat, alpha, maxCycles)
+        npy_name_2 = 'stocGrad1'
+
     weights_name        = './data/' + npy_name_1 + '_' + npy_name_2 + '_' + 'weights.npy'
     weight_record_name  = './data/' + npy_name_1 + '_' + npy_name_2 + '_' + 'weight_record.npy'
     loss_record_name    = './data/' + npy_name_1 + '_' + npy_name_2 + '_' + 'loss_record.npy'
