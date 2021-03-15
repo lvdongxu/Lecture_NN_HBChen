@@ -27,9 +27,9 @@ def loadDataSet(pre_or_not):   #读取数据（这里只有两个特征）
         # lineArr = line.strip().split()
         lineArr = line.split(",")
         # print(lineArr[0], lineArr[1], lineArr[2])
-        lineArr[0] = lineArr[0] if pre_or_not == 0 else lineArr[0] / 10
-        lineArr[1] = lineArr[1] if pre_or_not == 0 else lineArr[1] / 10
-        dataMat.append([1.0, float(lineArr[0]), float(lineArr[1])])   #前面的1，表示方程的常量。比如两个特征X1,X2，共需要三个参数，W1+W2*X1+W3*X2
+        lineArr_0 = float(lineArr[0]) if pre_or_not == 0 else float(lineArr[0]) / 10
+        lineArr_1 = float(lineArr[1]) if pre_or_not == 0 else float(lineArr[1]) / 10
+        dataMat.append([1.0, lineArr_0, lineArr_1])   #前面的1，表示方程的常量。比如两个特征X1,X2，共需要三个参数，W1+W2*X1+W3*X2
         labelMat.append(int(lineArr[2]))
     return dataMat,labelMat
 
@@ -101,7 +101,7 @@ def gradAscent(dataMat, labelMat, alpha, maxCycles): #梯度上升求最优参�
         h                 = sigmoid(dataMatrix * weights)
         error             = (classLabels - h)                                 #求导后差值
         weights           = weights + alpha * dataMatrix.transpose() * error  #迭代更新权重
-        preLabel, preProb = predict(weights, classLabels)
+        preLabel, preProb = predict(weights, dataMatrix)
         loss              = cost_function(preProb, classLabels)
         errRate           = predict_error_rate(preLabel, classLabels)
         weight_record[k]  = weights
@@ -130,7 +130,7 @@ def stocGradAscent0(dataMat, labelMat, alpha, maxCycles):
             h       = sigmoid(sum(dataMatrix[i] * weights))
             error   = classLabels[i] - h
             weights = weights + alpha * error * dataMatrix[i].transpose()
-        preLabel, preProb = predict(weights, classLabels)
+        preLabel, preProb = predict(weights, dataMatrix)
         loss              = cost_function(preProb, classLabels)
         errRate           = predict_error_rate(preLabel, classLabels)
         weight_record[k]  = weights
