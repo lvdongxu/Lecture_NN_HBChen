@@ -186,3 +186,12 @@ if __name__=='__main__':
     save(loss_record_name,    loss_record   )
     save(errRate_record_name, errRate_record)
 
+    txt_weights_name        = './data/' + npy_name_1 + '_' + npy_name_2 + '_' + 'weights.txt'
+    txt_weight_record_name  = './data/' + npy_name_1 + '_' + npy_name_2 + '_' + 'weight_record.txt'
+    txt_loss_record_name    = './data/' + npy_name_1 + '_' + npy_name_2 + '_' + 'loss_record.txt'
+    txt_errRate_record_name = './data/' + npy_name_1 + '_' + npy_name_2 + '_' + 'errRate_record.txt'
+
+    savetxt(txt_weights_name,        weights       )
+    savetxt(txt_weight_record_name,  weight_record )
+    savetxt(txt_loss_record_name,    loss_record   )
+    savetxt(txt_errRate_record_name, errRate_record)
