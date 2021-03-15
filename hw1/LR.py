@@ -61,9 +61,9 @@ def cost_function(preProb, labelMat):
     loss = 0.0
     for i in range(m):
         if preProb[i] >= 0 and preProb[i] <= 1:
-            loss -= labelMat[i] * log(preProb[i]) + (1 - labelMat[i]) * log(preProb[i])
+            loss += labelMat[i] * log(preProb[i]) + (1 - labelMat[i]) * log(1 - preProb[i])
         else:
-            loss -= 0.0
+            loss += 0.0
     return loss / m
 
 def predict_error_rate(preLabel, LabelMat):
